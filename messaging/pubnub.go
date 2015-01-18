@@ -1117,9 +1117,11 @@ func (pub *Pubnub) Publish(channel string, message interface{}, callbackChannel 
 	publishURLBuffer.WriteString(url.QueryEscape(channel))
 	publishURLBuffer.WriteString("/0/")
 
-	jsonSerialized, err := json.Marshal(message)
-	if err != nil {
-		pub.sendResponseToChannel(errorChannel, channel, responseAsIsError, fmt.Sprintf("error in serializing: %s", err), "")
+    //by Kaihong
+	//jsonSerialized, err := json.Marshal(message)
+    jsonSerialized, ok := message.(string)
+	if ok == false {
+		pub.sendResponseToChannel(errorChannel, channel, responseAsIsError, fmt.Sprintf("error in serializing: %t", ok), "")
 	} else {
 		if pub.cipherKey != "" {
 			//Encrypt and Serialize
@@ -1133,7 +1135,7 @@ func (pub *Pubnub) Publish(channel string, message interface{}, callbackChannel 
 				pub.sendPublishRequest(channel, publishURLBuffer.String(), jsonEncBytes, callbackChannel, errorChannel)
 			}
 		} else {
-			pub.sendPublishRequest(channel, publishURLBuffer.String(), jsonSerialized, callbackChannel, errorChannel)
+			pub.sendPublishRequest(channel, publishURLBuffer.String(), []byte(jsonSerialized), callbackChannel, errorChannel)
 		}
 	}
 }
